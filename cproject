@@ -1,0 +1,140 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+typedef struct {
+    char word[20];
+    char hint[50];
+} WordHint;
+
+WordHint wordList[] = {
+    {"GUITAR", "A musical instrument"},
+    {"MARKER", "Used for writing on a whiteboard"},
+    {"LANTERN", "A portable light source"},
+    {"PENCIL", "Used for sketching or writing"},
+    {"GARDEN", "A place with plants and flowers"},
+    {"FURNACE", "Used for heating a building"},
+    {"JOURNAL", "A personal diary or notebook"},
+    {"SANDWICH", "A food with bread and filling"},
+    {"SUNLIGHT", "Natural light from the sun"},
+    {"ELEPHANT", "A large animal with a trunk"},
+    {"FOOTBALL", "A popular sport with a round ball"},
+    {"CAMPFIRE", "Used for warmth while camping"},
+    {"NOTEBOOK", "Used for writing notes"},
+    {"BACKPACK", "Used for carrying books or items"},
+    {"CHICKEN", "A common farm bird"},
+    {"BICYCLE", "A two-wheeled vehicle"},
+    {"HOLIDAY", "A special day for relaxation"},
+    {"RAINBOW", "A colorful arc in the sky"},
+    {"LAPTOP", "A portable computer"},
+    {"CUPCAKE", "A small, sweet baked dessert"}
+};
+
+int usedWords[20] = {0};  // Array to track used words
+
+void shuffleWord(char word[]) {
+    int len = strlen(word);
+    for (int i = 0; i < len; i++) {
+        int j = rand() % len;
+        char temp = word[i];
+        word[i] = word[j];
+        word[j] = temp;
+    }
+}
+
+int getUniqueWordIndex() {
+    int index;
+    int remainingWords = 0;
+
+    // Count remaining words
+    for (int i = 0; i < 20; i++) {
+        if (usedWords[i] == 0) {
+            remainingWords++;
+        }
+    }
+
+    // If all words are used, reset the usedWords array
+    if (remainingWords == 0) {
+        for (int i = 0; i < 20; i++) {
+            usedWords[i] = 0;
+        }
+        remainingWords = 20;
+    }
+
+    // Pick a random unused word
+    do {
+        index = rand() % 20;
+    } while (usedWords[index] == 1);
+
+    usedWords[index] = 1;  // Mark word as used
+    return index;
+}
+
+int main() {
+    srand(time(0));
+    char playAgain;
+    int score = 0, rounds = 0, highestScore = 0, lives = 3;
+
+    printf("\n🔹 Welcome to the Word Scrambler Game! 🔹\n");
+    printf("You have ❤ 3 lives. Guess correctly to earn points!\n");
+
+    do {
+        if (lives == 0) {
+            printf("\n💀 Game Over! You lost all lives! 💀\n");
+            break;
+        }
+
+        rounds++;
+
+        int index = getUniqueWordIndex();  // Get a new, unused word
+        char originalWord[20];
+        char scrambledWord[20];
+        char hint[50];
+
+        strcpy(originalWord, wordList[index].word);
+        strcpy(scrambledWord, originalWord);
+        strcpy(hint, wordList[index].hint);
+
+        shuffleWord(scrambledWord);
+
+        printf("\n🔥 Round %d | ❤ Lives: %d | 🏆 Score: %d\n", rounds, lives, score);
+        printf("Hint: %s\n", hint);
+        printf("Guess the word: %s\n", scrambledWord);
+
+        char guess[20];
+        printf("Enter your guess: ");
+        scanf("%s", guess);
+
+        for (int i = 0; guess[i] != '\0'; i++) {
+            if (guess[i] >= 'a' && guess[i] <= 'z') {
+                guess[i] = guess[i] - 32;
+            }
+        }
+
+        if (strcmp(guess, originalWord) == 0) {
+            printf("✅ Correct! You earned 1 point!\n");
+            score++;
+        } else {
+            printf("❌ Wrong guess! The correct word was: %s\n", originalWord);
+            lives--;
+        }
+
+        if (score > highestScore) {
+            highestScore = score;
+        }
+
+        if (lives > 0) {
+            printf("\nDo you want to play again? (y/n): ");
+            scanf(" %c", &playAgain);
+        } else {
+            playAgain = 'n';
+        }
+
+    } while (playAgain == 'y' || playAgain == 'Y');
+
+    printf("\n🔹 Game Over! You scored %d out of %d rounds. 🔹\n", score, rounds);
+    printf("🏆 Highest Score: %d\n", highestScore);
+    printf("Thanks for playing! See you next time! 😊\n");
+    return 0;
+}
